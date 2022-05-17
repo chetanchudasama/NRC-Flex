@@ -1,0 +1,91 @@
+// Imports global types
+import "@twilio-labs/serverless-runtime-types";
+// Fetches specific types
+import {
+  Context,
+  ServerlessCallback,
+  ServerlessFunctionSignature,
+} from "@twilio-labs/serverless-runtime-types/types";
+
+type MyEvent = {
+  TokenResult?: any;
+  MapId?: string;
+};
+
+type MyContext = {
+  SYNC_SERVICE_SID?: string;
+};
+
+/**
+ * public twilio function exposed on the /listmapworkers path.
+ * protected via flex token, (admin/supervisors only).
+ * returns an object with a JSON array of the worker identitys that can access the given map id.
+ * @param {*} context
+ * @param {*} event
+ * @param {*} callback
+ */
+
+const TokenValidator = require("twilio-flex-token-validator").functionValidator;
+
+export const handler: ServerlessFunctionSignature = TokenValidator(
+  async function (
+    context: Context<MyContext>,
+    event: MyEvent,
+    callback: ServerlessCallback
+  ) {
+    // Create a custom Twilio Response
+    // Set the CORS headers to allow Flex to make an HTTP request to the Twilio Function
+    const response = new Twilio.Response();
+    response.appendHeader("Access-Control-Allow-Origin", "*");
+    response.appendHeader("Access-Control-Allow-Methods", "OPTIONS, POST, GET");
+    response.appendHeader("Access-Control-Allow-Headers", "Content-Type");
+    response.appendHeader("Content-Type", "application/json");
+
+    //bug check event
+    if (event.TokenResult === undefined || event.MapId === undefined) {
+      response.setBody("Error, missing fields from event");
+      response.setStatusCode(400);
+      callback(null, response);
+      return;
+    }
+
+    //bug check context
+    if (context.SYNC_SERVICE_SID === undefined) {
+      response.setBody("Error, missing keys from context");
+      response.setStatusCode(500);
+      callback(null, response);
+      return;
+    }
+
+    // parse identity, check roles from request
+    const userRoles = event.TokenResult.roles;
+
+    if (
+      !Array.isArray(userRoles) ||
+      userRoles.findIndex((e) => e === "admin" || e === "supervisor") === -1
+    ) {
+      response.setBody("permission denied: admin / supervisor role missing");
+      response.setStatusCode(403);
+      callback(null, response);
+      return;
+    }
+
+    try {
+      const client = context.getTwilioClient();
+
+      const permissions = await client.sync
+        .services(context.SYNC_SERVICE_SID)
+        .syncMaps(event.MapId)
+        .syncMapPermissions.list();
+
+      const workerIdentities = permissions.map((e) => e.identity) || [];
+
+      response.setBody({ workerIdentities });
+      response.setStatusCode(200);
+      callback(null, response);
+    } catch (e) {
+      //bad
+      callback(e);
+    }
+  }
+);

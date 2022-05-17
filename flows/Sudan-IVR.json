@@ -1,0 +1,2980 @@
+{
+  "description": "A New Flow",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "event": "incomingMessage"
+        },
+        {
+          "event": "incomingCall"
+        },
+        {
+          "next": "StartOutboundCall",
+          "event": "incomingRequest"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "name": "StartOutboundCall",
+      "type": "make-outgoing-call-v2",
+      "transitions": [
+        {
+          "next": "SetURL",
+          "event": "answered"
+        },
+        {
+          "event": "busy"
+        },
+        {
+          "event": "noAnswer"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "machine_detection_speech_threshold": "2400",
+        "detect_answering_machine": false,
+        "offset": {
+          "x": 140,
+          "y": 290
+        },
+        "recording_channels": "mono",
+        "timeout": 60,
+        "machine_detection": "Enable",
+        "trim": "do-not-trim",
+        "record": false,
+        "machine_detection_speech_end_threshold": "1200",
+        "machine_detection_timeout": "30",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "machine_detection_silence_timeout": "5000"
+      }
+    },
+    {
+      "name": "WelcomeMessage",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "LanguageSplit",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsLanguage",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}WelcomeMessage.mp3",
+        "voice": "default",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 140,
+          "y": 620
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "LanguageSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "SetAttemptsLanguage",
+          "event": "noMatch"
+        },
+        {
+          "next": "SetLanguageEnglish",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "English",
+              "arguments": [
+                "{{widgets.WelcomeMessage.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "SetLanguageArabic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "Arabic",
+              "arguments": [
+                "{{widgets.WelcomeMessage.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "SetLanguageTigrinya",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "Tigrinya",
+              "arguments": [
+                "{{widgets.WelcomeMessage.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "SetLanguageAmharic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "Amharic",
+              "arguments": [
+                "{{widgets.WelcomeMessage.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.WelcomeMessage.Digits}}",
+        "offset": {
+          "x": 140,
+          "y": 920
+        }
+      }
+    },
+    {
+      "name": "SetLanguageEnglish",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "MenuEnterance",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "English",
+            "key": "Language"
+          }
+        ],
+        "offset": {
+          "x": 0,
+          "y": 1210
+        }
+      }
+    },
+    {
+      "name": "SetLanguageArabic",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "MenuEnterance",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Arabic",
+            "key": "Language"
+          }
+        ],
+        "offset": {
+          "x": 360,
+          "y": 1210
+        }
+      }
+    },
+    {
+      "name": "RegionLanguageSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "SetAttemptsLanguage",
+          "event": "noMatch"
+        },
+        {
+          "next": "RegionEnglish",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to English",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "English"
+            }
+          ]
+        },
+        {
+          "next": "RegionArabic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Arabic",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Arabic"
+            }
+          ]
+        },
+        {
+          "next": "RegionTigrinya",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Tigrinya",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Tigrinya"
+            }
+          ]
+        },
+        {
+          "next": "RegionAmharic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Amharic",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Amharic"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Language}}",
+        "offset": {
+          "x": 90,
+          "y": 1630
+        }
+      }
+    },
+    {
+      "name": "RegionEnglish",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetRegionDigit",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsRegion",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}RegionEnglish.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 0,
+          "y": 1950
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "RegionArabic",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetRegionDigitArabic",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsRegion",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}RegionArabic.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 450,
+          "y": 1950
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "SetRegionDigit",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "RegionDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.RegionEnglish.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 0,
+          "y": 2190
+        }
+      }
+    },
+    {
+      "name": "SetRegionDigitArabic",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "RegionDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.RegionArabic.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 450,
+          "y": 2190
+        }
+      }
+    },
+    {
+      "name": "RegionDigitSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "SetAttemptsRegion",
+          "event": "noMatch"
+        },
+        {
+          "next": "SetRegionKhartoum",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 1",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "SetRegionDarfur",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 2",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "SetRegionGedaref",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 3",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "MenuEnterance",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 6",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "6"
+            }
+          ]
+        },
+        {
+          "next": "SetRegionOther",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 4",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Digits}}",
+        "offset": {
+          "x": 330,
+          "y": 2590
+        }
+      }
+    },
+    {
+      "name": "SetAttemptsRegion",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "AttemptsSplitRegion",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{flow.variables.Attempts | plus: 1}}",
+            "key": "Attempts"
+          }
+        ],
+        "offset": {
+          "x": 1700,
+          "y": 1840
+        }
+      }
+    },
+    {
+      "name": "MenuEnterance",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "RegionLanguageSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "0",
+            "key": "Attempts"
+          }
+        ],
+        "offset": {
+          "x": 190,
+          "y": 1430
+        }
+      }
+    },
+    {
+      "name": "AttemptsSplitRegion",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "RegionLanguageSplit",
+          "event": "noMatch"
+        },
+        {
+          "next": "SetReasonAttempts",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value greater_than 1",
+              "arguments": [
+                "{{flow.variables.Attempts}}"
+              ],
+              "type": "greater_than",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Attempts}}",
+        "offset": {
+          "x": 1660,
+          "y": 2130
+        }
+      }
+    },
+    {
+      "name": "TooManyAttempts",
+      "type": "say-play",
+      "transitions": [
+        {
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}TooManyAttempts{{flow.variables.Language}}.mp3",
+        "offset": {
+          "x": 2040,
+          "y": 1000
+        },
+        "loop": 1
+      }
+    },
+    {
+      "name": "SetLanguageTigrinya",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "MenuEnterance",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Tigrinya",
+            "key": "Language"
+          }
+        ],
+        "offset": {
+          "x": 710,
+          "y": 1210
+        }
+      }
+    },
+    {
+      "name": "SetLanguageAmharic",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "MenuEnterance",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Amharic",
+            "key": "Language"
+          }
+        ],
+        "offset": {
+          "x": 1070,
+          "y": 1200
+        }
+      }
+    },
+    {
+      "name": "RegionTigrinya",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetRegionDigitTigrinya",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsRegion",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}RegionTigrinya.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 800,
+          "y": 1960
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "RegionAmharic",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetRegionDigitAmharic",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsRegion",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}RegionAmharic.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 1250,
+          "y": 1970
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "SetRegionDigitTigrinya",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "RegionDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.RegionTigrinya.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 800,
+          "y": 2190
+        }
+      }
+    },
+    {
+      "name": "SetRegionDigitAmharic",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "RegionDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.RegionAmharic.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 1250,
+          "y": 2200
+        }
+      }
+    },
+    {
+      "name": "SetRegionKhartoum",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "ServiceMenuEnterance",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Khartoum",
+            "key": "Region"
+          }
+        ],
+        "offset": {
+          "x": 150,
+          "y": 2900
+        }
+      }
+    },
+    {
+      "name": "SetRegionDarfur",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "ServiceMenuEnterance",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Darfur",
+            "key": "Region"
+          }
+        ],
+        "offset": {
+          "x": 500,
+          "y": 2900
+        }
+      }
+    },
+    {
+      "name": "SetRegionGedaref",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "ServiceMenuEnterance",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Gedaref",
+            "key": "Region"
+          }
+        ],
+        "offset": {
+          "x": 840,
+          "y": 2910
+        }
+      }
+    },
+    {
+      "name": "ServiceMenuEnterance",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "ServiceLanguageSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "0",
+            "key": "Attempts"
+          }
+        ],
+        "offset": {
+          "x": 496,
+          "y": 3296
+        }
+      }
+    },
+    {
+      "name": "SetAttemptsLanguage",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "Copy_of_AttemptsSplitRegion",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{flow.variables.Attempts | plus: 1}}",
+            "key": "Attempts"
+          }
+        ],
+        "offset": {
+          "x": 800,
+          "y": 610
+        }
+      }
+    },
+    {
+      "name": "Copy_of_AttemptsSplitRegion",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "WelcomeMessage",
+          "event": "noMatch"
+        },
+        {
+          "next": "SetReasonAttempts",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value greater_than 1",
+              "arguments": [
+                "{{flow.variables.Attempts}}"
+              ],
+              "type": "greater_than",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Attempts}}",
+        "offset": {
+          "x": 760,
+          "y": 850
+        }
+      }
+    },
+    {
+      "name": "ServiceLanguageSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "ServiceEnglish",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to English",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "English"
+            }
+          ]
+        },
+        {
+          "next": "ServiceArabic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Arabic",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Arabic"
+            }
+          ]
+        },
+        {
+          "next": "ServiceTigrinya",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Tigrinya",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Tigrinya"
+            }
+          ]
+        },
+        {
+          "next": "ServiceAmharic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Amharic",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Amharic"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Language}}",
+        "offset": {
+          "x": 270,
+          "y": 3590
+        }
+      }
+    },
+    {
+      "name": "ServiceEnglish",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetServiceDigits",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsService",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}ServiceEnglish.mp3",
+        "voice": "default",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 160,
+          "y": 3930
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "ServiceArabic",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetServiceDigitsArabic",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsService",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}ServiceArabic.mp3",
+        "voice": "default",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 510,
+          "y": 3930
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "ServiceTigrinya",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetServiceDigitsTigrinya",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsService",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}ServiceTigrinya.mp3",
+        "voice": "default",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 920,
+          "y": 3930
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "ServiceAmharic",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetServiceAmharic",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsService",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}ServiceAmharic.mp3",
+        "voice": "default",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 1290,
+          "y": 3920
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "SetServiceDigits",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "ServiceSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.ServiceEnglish.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 160,
+          "y": 4190
+        }
+      }
+    },
+    {
+      "name": "SetServiceDigitsArabic",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "ServiceSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.ServiceArabic.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 510,
+          "y": 4190
+        }
+      }
+    },
+    {
+      "name": "SetServiceDigitsTigrinya",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "ServiceSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.ServiceTigrinya.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 910,
+          "y": 4190
+        }
+      }
+    },
+    {
+      "name": "SetServiceAmharic",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "ServiceSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.ServiceAmharic.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 1310,
+          "y": 4190
+        }
+      }
+    },
+    {
+      "name": "ServiceSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "SetAttemptsService",
+          "event": "noMatch"
+        },
+        {
+          "next": "RefugeeMenuEnterance",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 1",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "ComplaintsLanguageSplit",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 2",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "ServiceMenuEnterance",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 6",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "6"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Digits}}",
+        "offset": {
+          "x": 624,
+          "y": 4538
+        }
+      }
+    },
+    {
+      "name": "SetAttemptsService",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "AttemptsServiceSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{flow.variables.Attempts | plus: 1}}",
+            "key": "Attempts"
+          }
+        ],
+        "offset": {
+          "x": 1740,
+          "y": 3920
+        }
+      }
+    },
+    {
+      "name": "AttemptsServiceSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "ServiceLanguageSplit",
+          "event": "noMatch"
+        },
+        {
+          "next": "SetReasonAttempts",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value greater_than 1",
+              "arguments": [
+                "{{flow.variables.Attempts}}"
+              ],
+              "type": "greater_than",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Attempts}}",
+        "offset": {
+          "x": 1750,
+          "y": 4190
+        }
+      }
+    },
+    {
+      "name": "ComplaintsLanguageSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "ComplaintsAndFeedbackEnglish",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to English",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "English"
+            }
+          ]
+        },
+        {
+          "next": "ComplaintsAndFeedbackArabic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Arabic",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Arabic"
+            }
+          ]
+        },
+        {
+          "next": "ComplaintsAndFeedbackTigrinya",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Tigrinya",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Tigrinya"
+            }
+          ]
+        },
+        {
+          "next": "ComplaintsAndFeedbackAmharic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Amharic",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Amharic"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Language}}",
+        "offset": {
+          "x": 1844,
+          "y": 4914
+        }
+      }
+    },
+    {
+      "name": "RecordComplaint",
+      "type": "record-voicemail",
+      "transitions": [
+        {
+          "next": "IVRComplete",
+          "event": "recordingComplete"
+        },
+        {
+          "event": "noAudio"
+        },
+        {
+          "event": "hangup"
+        }
+      ],
+      "properties": {
+        "transcribe": false,
+        "offset": {
+          "x": 2250,
+          "y": 5650
+        },
+        "trim": "trim-silence",
+        "play_beep": "true",
+        "timeout": 5,
+        "max_length": 3600
+      }
+    },
+    {
+      "name": "ComplaintsAndFeedbackEnglish",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "RecordComplaint",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}ComplaintsEnglish.mp3",
+        "offset": {
+          "x": 1800,
+          "y": 5270
+        },
+        "loop": 1
+      }
+    },
+    {
+      "name": "ComplaintsAndFeedbackArabic",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "RecordComplaint",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}ComplaintsArabic.mp3",
+        "offset": {
+          "x": 2160,
+          "y": 5270
+        },
+        "loop": 1
+      }
+    },
+    {
+      "name": "ComplaintsAndFeedbackTigrinya",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "RecordComplaint",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}ComplaintsTigrinya.mp3",
+        "offset": {
+          "x": 2510,
+          "y": 5270
+        },
+        "loop": 1
+      }
+    },
+    {
+      "name": "ComplaintsAndFeedbackAmharic",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "RecordComplaint",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}ComplaintsAmharic.mp3",
+        "offset": {
+          "x": 2880,
+          "y": 5270
+        },
+        "loop": 1
+      }
+    },
+    {
+      "name": "IVRComplete",
+      "type": "run-function",
+      "transitions": [
+        {
+          "event": "success"
+        },
+        {
+          "event": "fail"
+        }
+      ],
+      "properties": {
+        "service_sid": "ZSe2576387e57cf72366b1bd8132aa7c4f",
+        "environment_sid": "ZE846f110ad30134d2b843f3903c9cc2e5",
+        "offset": {
+          "x": 2230,
+          "y": 5980
+        },
+        "function_sid": "ZH318af18fa386966b92fb4ac65db141ab",
+        "parameters": [
+          {
+            "value": "{{contact.channel.address}}",
+            "key": "From"
+          },
+          {
+            "value": "{{flow.variables.Language}}",
+            "key": "Language"
+          },
+          {
+            "value": "{{flow.variables.Region}}",
+            "key": "Location"
+          },
+          {
+            "value": "true",
+            "key": "IsComplaint"
+          },
+          {
+            "value": "N/A",
+            "key": "HelpOption"
+          },
+          {
+            "value": "{{widgets.RecordComplaint.RecordingUrl}}",
+            "key": "VoicemailURL"
+          }
+        ],
+        "url": "https://functions-service-5006-dev.twil.io/ivrcomplete"
+      }
+    },
+    {
+      "name": "RefugeeMenuEnterance",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "RefugeeLanguageSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "0",
+            "key": "Attempts"
+          }
+        ],
+        "offset": {
+          "x": 270,
+          "y": 4810
+        }
+      }
+    },
+    {
+      "name": "RefugeeLanguageSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "RefugeeEnglish",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to English",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "English"
+            }
+          ]
+        },
+        {
+          "next": "RefugeeArabic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Arabic",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Arabic"
+            }
+          ]
+        },
+        {
+          "next": "RefugeeTigrinya",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Tigrinya",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Tigrinya"
+            }
+          ]
+        },
+        {
+          "next": "RefugeeAmharic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Amharic",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Amharic"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Language}}",
+        "offset": {
+          "x": 150,
+          "y": 5080
+        }
+      }
+    },
+    {
+      "name": "RefugeeEnglish",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetRefugeeDigits",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsRefugee",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}CallerTypeEnglish.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 10,
+          "y": 5360
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "RefugeeArabic",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetRefugeeDigitsArabic",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsRefugee",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}CallerTypeArabic.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 340,
+          "y": 5370
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "RefugeeTigrinya",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetTigrinyaDigits",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsRefugee",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}CallerTypeTigrinya.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 670,
+          "y": 5370
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "RefugeeAmharic",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetAmharicDigits",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsRefugee",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}CallerTypeAmharic.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 1010,
+          "y": 5370
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "SetAttemptsRefugee",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "RefugeeServiceSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{flow.variables.Attempts | plus: 1}}",
+            "key": "Attempts"
+          }
+        ],
+        "offset": {
+          "x": 1380,
+          "y": 5350
+        }
+      }
+    },
+    {
+      "name": "RefugeeServiceSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "RefugeeLanguageSplit",
+          "event": "noMatch"
+        },
+        {
+          "next": "SetReasonAttempts",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value greater_than 1",
+              "arguments": [
+                "{{flow.variables.Attempts}}"
+              ],
+              "type": "greater_than",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Attempts}}",
+        "offset": {
+          "x": 1360,
+          "y": 5680
+        }
+      }
+    },
+    {
+      "name": "SetRefugeeDigits",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "RefugeeDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.RefugeeEnglish.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 10,
+          "y": 5650
+        }
+      }
+    },
+    {
+      "name": "SetRefugeeDigitsArabic",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "RefugeeDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.RefugeeArabic.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 360,
+          "y": 5650
+        }
+      }
+    },
+    {
+      "name": "SetTigrinyaDigits",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "RefugeeDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.RefugeeTigrinya.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 680,
+          "y": 5650
+        }
+      }
+    },
+    {
+      "name": "SetAmharicDigits",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "RefugeeDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.RefugeeAmharic.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 1020,
+          "y": 5650
+        }
+      }
+    },
+    {
+      "name": "RefugeeDigitSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "SetAttemptsRefugee",
+          "event": "noMatch"
+        },
+        {
+          "next": "SetRefugee",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 1",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "SetIDP",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 2",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "RefugeeMenuEnterance",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 6",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "6"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Digits}}",
+        "offset": {
+          "x": 500,
+          "y": 6040
+        }
+      }
+    },
+    {
+      "name": "SetRefugee",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "FAQMenuEnterance",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Refugee",
+            "key": "CallerType"
+          }
+        ],
+        "offset": {
+          "x": 410,
+          "y": 6290
+        }
+      }
+    },
+    {
+      "name": "SetIDP",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "FAQMenuEnterance",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "IDP",
+            "key": "CallerType"
+          }
+        ],
+        "offset": {
+          "x": 920,
+          "y": 6290
+        }
+      }
+    },
+    {
+      "name": "FAQMenuEnterance",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "FAQLanguageSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "0",
+            "key": "Attempts"
+          }
+        ],
+        "offset": {
+          "x": 600,
+          "y": 6550
+        }
+      }
+    },
+    {
+      "name": "FAQLanguageSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "FAQEnglish",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to English",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "English"
+            }
+          ]
+        },
+        {
+          "next": "FAQArabic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Arabic",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Arabic"
+            }
+          ]
+        },
+        {
+          "next": "FAQTigrinya",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Tigrinya",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Tigrinya"
+            }
+          ]
+        },
+        {
+          "next": "FAQAmharic",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to Amharic",
+              "arguments": [
+                "{{flow.variables.Language}}"
+              ],
+              "type": "equal_to",
+              "value": "Amharic"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Language}}",
+        "offset": {
+          "x": 380,
+          "y": 6870
+        }
+      }
+    },
+    {
+      "name": "FAQEnglish",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetFAQDigits",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsFAQ",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}LegalDocumentsMenuEnglish.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 340,
+          "y": 7200
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "FAQArabic",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetFAQDigitsArabic",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsFAQ",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}LegalDocumentsMenuArabic.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 690,
+          "y": 7200
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "FAQTigrinya",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetFAQDigitsTigrinya",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsFAQ",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}LegalDocumentsMenuTigrinya.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 1020,
+          "y": 7200
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "FAQAmharic",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "SetFAQDigitsAmharic",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsFAQ",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}LegalDocumentsMenuAmharic.mp3",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 1380,
+          "y": 7180
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "language": "default",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "SetAttemptsFAQ",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "FAQAttemptsSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{flow.variables.Attempts | plus: 1}}",
+            "key": "Attempts"
+          }
+        ],
+        "offset": {
+          "x": 1800,
+          "y": 7200
+        }
+      }
+    },
+    {
+      "name": "FAQAttemptsSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "FAQLanguageSplit",
+          "event": "noMatch"
+        },
+        {
+          "next": "SetReasonAttempts",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value greater_than 1",
+              "arguments": [
+                "{{flow.variables.Attempts}}"
+              ],
+              "type": "greater_than",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Attempts}}",
+        "offset": {
+          "x": 1760,
+          "y": 7460
+        }
+      }
+    },
+    {
+      "name": "SetFAQDigits",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "FAQDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.FAQEnglish.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 360,
+          "y": 7450
+        }
+      }
+    },
+    {
+      "name": "SetFAQDigitsArabic",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "FAQDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.FAQArabic.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 710,
+          "y": 7450
+        }
+      }
+    },
+    {
+      "name": "SetFAQDigitsTigrinya",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "FAQDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.FAQTigrinya.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 1040,
+          "y": 7450
+        }
+      }
+    },
+    {
+      "name": "SetFAQDigitsAmharic",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "FAQDigitSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{widgets.FAQAmharic.Digits}}",
+            "key": "Digits"
+          }
+        ],
+        "offset": {
+          "x": 1310,
+          "y": 7460
+        }
+      }
+    },
+    {
+      "name": "FAQDigitSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "SetAttemptsFAQ",
+          "event": "noMatch"
+        },
+        {
+          "next": "SetHelpOptionIDCard",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 1",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "SetHelpOptionNationalNumber",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 2",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "SetHelpOptionBirthCert",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 3",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "next": "SetHelpOptionMarriageCert",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 4",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "next": "SetHelpOptionDeathCert",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 5",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "5"
+            }
+          ]
+        },
+        {
+          "next": "SetHelpOptionOther",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 6",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "6"
+            }
+          ]
+        },
+        {
+          "next": "FAQMenuEnterance",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 7",
+              "arguments": [
+                "{{flow.variables.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "7"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Digits}}",
+        "offset": {
+          "x": 140,
+          "y": 7950
+        }
+      }
+    },
+    {
+      "name": "ClosingMessage",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "ClosingDigitsSplit",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "SetAttemptsClosing",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}Closing{{flow.variables.Language}}.mp3}}",
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 460,
+          "y": 9120
+        },
+        "loop": 1,
+        "finish_on_key": "#",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 5
+      }
+    },
+    {
+      "name": "SetAttemptsClosing",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "ClosingAttemptsSplit",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "{{flow.variables.Attempts | plus: 1}}",
+            "key": "Attempts"
+          }
+        ],
+        "offset": {
+          "x": 1280,
+          "y": 9130
+        }
+      }
+    },
+    {
+      "name": "ClosingAttemptsSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "ClosingMessage",
+          "event": "noMatch"
+        },
+        {
+          "next": "SetReasonAttempts",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value greater_than 1",
+              "arguments": [
+                "{{flow.variables.Attempts}}"
+              ],
+              "type": "greater_than",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{flow.variables.Attempts}}",
+        "offset": {
+          "x": 1210,
+          "y": 9380
+        }
+      }
+    },
+    {
+      "name": "ClosingEnterance",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "ClosingMessage",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "0",
+            "key": "Attempts"
+          }
+        ],
+        "offset": {
+          "x": 470,
+          "y": 8910
+        }
+      }
+    },
+    {
+      "name": "ClosingDigitsSplit",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "SetAttemptsClosing",
+          "event": "noMatch"
+        },
+        {
+          "next": "PlayFAQAudio",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 1",
+              "arguments": [
+                "{{widgets.ClosingMessage.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "WelcomeMessage",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 2",
+              "arguments": [
+                "{{widgets.ClosingMessage.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "next": "LeaveVoicemail",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value equal_to 3",
+              "arguments": [
+                "{{widgets.ClosingMessage.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "3"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.ClosingMessage.Digits}}",
+        "offset": {
+          "x": 440,
+          "y": 9360
+        }
+      }
+    },
+    {
+      "name": "LeaveVoicemail",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "HelpVoicemail",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 860,
+          "y": 9700
+        },
+        "loop": 1,
+        "say": "Please leave a short and clear message with your name, and an inquiry. A member of our team will call you back, please note that it is optional to leave your name.",
+        "language": "default"
+      }
+    },
+    {
+      "name": "HelpVoicemail",
+      "type": "record-voicemail",
+      "transitions": [
+        {
+          "next": "IVRComplete2",
+          "event": "recordingComplete"
+        },
+        {
+          "event": "noAudio"
+        },
+        {
+          "event": "hangup"
+        }
+      ],
+      "properties": {
+        "transcribe": false,
+        "offset": {
+          "x": 950,
+          "y": 10000
+        },
+        "trim": "trim-silence",
+        "play_beep": "true",
+        "timeout": 5,
+        "max_length": 3600
+      }
+    },
+    {
+      "name": "IVRComplete2",
+      "type": "run-function",
+      "transitions": [
+        {
+          "event": "success"
+        },
+        {
+          "event": "fail"
+        }
+      ],
+      "properties": {
+        "service_sid": "ZSe2576387e57cf72366b1bd8132aa7c4f",
+        "environment_sid": "ZE846f110ad30134d2b843f3903c9cc2e5",
+        "offset": {
+          "x": 1150,
+          "y": 10270
+        },
+        "function_sid": "ZH318af18fa386966b92fb4ac65db141ab",
+        "parameters": [
+          {
+            "value": "{{contact.channel.address}}",
+            "key": "From"
+          },
+          {
+            "value": "{{flow.variables.Language}}",
+            "key": "Language"
+          },
+          {
+            "value": "false",
+            "key": "IsComplaint"
+          },
+          {
+            "value": "{{flow.variables.CallerType}}",
+            "key": "CallerType"
+          },
+          {
+            "value": "{{flow.variables.HelpOption}}",
+            "key": "HelpOption"
+          },
+          {
+            "value": "{{widgets.HelpVoicemail.RecordingUrl}}",
+            "key": "VoicemailURL"
+          },
+          {
+            "value": "{{flow.variables.Region}}",
+            "key": "Location"
+          }
+        ],
+        "url": "https://functions-service-5006-dev.twil.io/ivrcomplete"
+      }
+    },
+    {
+      "name": "SetHelpOptionIDCard",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "PlayFAQAudio",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Legal Documents - ID Card",
+            "key": "HelpOption"
+          },
+          {
+            "value": "LegalDocuments{{flow.variables.Digits}}{{flow.variables.Language}}",
+            "key": "FAQAnswer"
+          }
+        ],
+        "offset": {
+          "x": -390,
+          "y": 8320
+        }
+      }
+    },
+    {
+      "name": "SetHelpOptionNationalNumber",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "PlayFAQAudio",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "National Number",
+            "key": "HelpOption"
+          },
+          {
+            "value": "LegalDocuments{{flow.variables.Digits}}{{flow.variables.Language}}",
+            "key": "FAQAnswer"
+          }
+        ],
+        "offset": {
+          "x": 0,
+          "y": 8320
+        }
+      }
+    },
+    {
+      "name": "SetHelpOptionMarriageCert",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "PlayFAQAudio",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Marriage Certifitcate",
+            "key": "HelpOption"
+          },
+          {
+            "value": "LegalDocuments{{flow.variables.Digits}}{{flow.variables.Language}}",
+            "key": "FAQAnswer"
+          }
+        ],
+        "offset": {
+          "x": 750,
+          "y": 8320
+        }
+      }
+    },
+    {
+      "name": "SetHelpOptionDeathCert",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "PlayFAQAudio",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Death Certificate",
+            "key": "HelpOption"
+          },
+          {
+            "value": "LegalDocuments{{flow.variables.Digits}}{{flow.variables.Language}}",
+            "key": "FAQAnswer"
+          }
+        ],
+        "offset": {
+          "x": 1110,
+          "y": 8320
+        }
+      }
+    },
+    {
+      "name": "SetHelpOptionOther",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "PlayFAQAudio",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Other",
+            "key": "HelpOption"
+          },
+          {
+            "value": "LegalDocuments{{flow.variables.Digits}}{{flow.variables.Language}}",
+            "key": "FAQAnswer"
+          }
+        ],
+        "offset": {
+          "x": 1500,
+          "y": 8320
+        }
+      }
+    },
+    {
+      "name": "SetHelpOptionBirthCert",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "PlayFAQAudio",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Birth Certificate",
+            "key": "HelpOption"
+          },
+          {
+            "value": "LegalDocuments{{flow.variables.Digits}}{{flow.variables.Language}}",
+            "key": "FAQAnswer"
+          }
+        ],
+        "offset": {
+          "x": 380,
+          "y": 8320
+        }
+      }
+    },
+    {
+      "name": "TimoutFunction",
+      "type": "run-function",
+      "transitions": [
+        {
+          "next": "TooManyAttempts",
+          "event": "success"
+        },
+        {
+          "event": "fail"
+        }
+      ],
+      "properties": {
+        "service_sid": "ZSe2576387e57cf72366b1bd8132aa7c4f",
+        "environment_sid": "ZE846f110ad30134d2b843f3903c9cc2e5",
+        "offset": {
+          "x": 2040,
+          "y": 740
+        },
+        "function_sid": "ZHc05aca1b044ddba8077e746a6da101ec",
+        "parameters": [
+          {
+            "value": "{{contact.channel.address}}",
+            "key": "PhoneNumber"
+          },
+          {
+            "value": "{{flow.sid}}",
+            "key": "FlowExecutionSid"
+          },
+          {
+            "value": "{{flow.flow_sid}}",
+            "key": "FlowSid"
+          },
+          {
+            "value": "{{flow.variables.Reason}}",
+            "key": "Reason"
+          }
+        ],
+        "url": "https://functions-service-5006-dev.twil.io/flow-timeout"
+      }
+    },
+    {
+      "name": "SetReasonAttempts",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "TimoutFunction",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Too many failed attempts",
+            "key": "Reason"
+          }
+        ],
+        "offset": {
+          "x": 2040,
+          "y": 510
+        }
+      }
+    },
+    {
+      "name": "PlayFAQAudio",
+      "type": "say-play",
+      "transitions": [
+        {
+          "next": "ClosingEnterance",
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "play": "{{flow.variables.URL}}{{flow.variables.FAQAnswer}}.mp3",
+        "offset": {
+          "x": 480,
+          "y": 8650
+        },
+        "loop": 1
+      }
+    },
+    {
+      "name": "SetRegionOther",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "Gedaref",
+            "key": "Region"
+          }
+        ],
+        "offset": {
+          "x": 1190,
+          "y": 2910
+        }
+      }
+    },
+    {
+      "name": "SetURL",
+      "type": "set-variables",
+      "transitions": [
+        {
+          "next": "WelcomeMessage",
+          "event": "next"
+        }
+      ],
+      "properties": {
+        "variables": [
+          {
+            "value": "https://puce-impala-4082.twil.io/assets/",
+            "key": "URL"
+          }
+        ],
+        "offset": {
+          "x": 620,
+          "y": 360
+        }
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}

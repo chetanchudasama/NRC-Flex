@@ -1,0 +1,31 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "Settings": {
+      "TWILIO_ACCOUNT_SID": "ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "TWILIO_API_KEY": "SKXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "TWILIO_API_SECRET": "***************************",
+      "TWILIO_FLOW_SID": "FWXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "TWILIO_TASKROUTER_WORKSPACE_SID": "WSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "TWILIO_SYNC_SERVICE_SID": "ISXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "TWILIO_TIMEOUT_SYNC_MAP_SID": "MPXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "TWILIO_CALLBACK_ARCHIVE_MAP_SID": "MPXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "TWILIO_TIMEOUT_ARCHIVE_MAP_SID": "MPXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "GRAPH_TENANT_ID": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx",
+      "GRAPH_CLIENT_ID": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx",
+      "GRAPH_USERNAME": "user@example.com",
+      "GRAPH_PASSWORD": "***************************",
+      "SHAREPOINT_DATA_DRIVE_ID": "b!*************************************************************",
+      "SHAREPOINT_DATA_FOLDER_NAME": "Calls",
+      "AZURE_ACI_SUBSCRIPTION_ID": "",
+      "AZURE_ACI_RESOURCE_GROUP_NAME": "",
+      "AZURE_ACR_SERVER": "",
+      "AZURE_ACR_USERNAME": "",
+      "AZURE_ACR_PASSWORD": "",
+      "AZURE_ACR_IMAGE_NAME": "",
+      "AZURE_ACR_IMAGE_TAG": ""
+    }
+  }
+}
